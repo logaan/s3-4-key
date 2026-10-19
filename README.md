@@ -63,12 +63,17 @@ source "$HOME/export-esp.sh"            # add to your shell profile to make perm
 rustup target add xtensa-esp32s3-espidf --toolchain esp
 ```
 
-Build, flash and monitor (from the `firmware/` directory):
+Build, flash and monitor (from the `firmware/` directory; `firmware/.cargo/config.toml`
+supplies the target and `build-std` for cargo-espflash, scoped so host-side
+`cargo test` at the workspace root is unaffected):
 
 ```sh
 cd firmware
 cargo +esp firmware                                        # build only (alias)
-cargo +esp espflash flash --release --partition-table ../partitions.csv --monitor
+cargo +esp espflash list-ports                             # find the StickS3
+cargo +esp espflash flash --release --port /dev/cu.usbmodem1101 \
+    --partition-table ../partitions.csv
+cargo +esp espflash monitor --port /dev/cu.usbmodem1101    # logs; needs a real terminal
 ```
 
 The first build downloads and compiles ESP-IDF, which takes a while.

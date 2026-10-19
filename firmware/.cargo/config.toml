@@ -1,0 +1,11 @@
+# Build configuration for the ESP-IDF firmware package only.
+#
+# Scoped to firmware/ (cargo merges this with the workspace root config when
+# running from this directory). The root's host-side `cargo test` runs against
+# the stable toolchain and must not see [unstable]; `build-std` requires -Z,
+# which only the `esp` nightly-based toolchain accepts.
+[build]
+target = "xtensa-esp32s3-espidf"
+
+[unstable]
+build-std = ["std", "panic_abort"]
