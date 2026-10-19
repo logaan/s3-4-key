@@ -1,0 +1,12 @@
+[alias]
+firmware = "build -Z build-std=std,panic_abort --release --package s3-4-key --target xtensa-esp32s3-espidf"
+
+[target.xtensa-esp32s3-espidf]
+linker = "ldproxy"
+rustflags = ["--cfg", "espidf_time64"]
+
+[env]
+MCU = "esp32s3"
+ESP_IDF_VERSION = "v5.5.2"
+# Also find the workspace when CARGO_TARGET_DIR is set outside the project.
+CARGO_WORKSPACE_DIR = { value = "", relative = true }

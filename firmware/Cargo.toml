@@ -1,0 +1,23 @@
+[package]
+name = "s3-4-key"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "Rust BLE keyboard firmware for the M5Stack StickS3"
+
+[[bin]]
+name = "s3-4-key"
+path = "src/main.rs"
+test = false
+bench = false
+
+[dependencies]
+anyhow = "1"
+log = "0.4"
+esp-idf-svc = "=0.53.0"
+esp32-nimble = "=0.13.0"
+s3-4-key-core = { path = ".." }
+embedded-graphics = "0.8.2"
+
+[build-dependencies]
+embuild = { version = "0.33.5", features = ["espidf"] }

@@ -1,0 +1,6 @@
+/target/
+/.embuild/
+/sdkconfig
+/sdkconfig.*
+!/sdkconfig.defaults
+/.DS_Store

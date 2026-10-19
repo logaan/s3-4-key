@@ -1,0 +1,30 @@
+[package]
+name = "s3-4-key-core"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "Hardware-independent input, HID, battery and UI logic for the StickS3 keyboard"
+
+[workspace]
+members = ["firmware"]
+default-members = ["."]
+resolver = "2"
+
+[dependencies]
+embedded-graphics = "0.8.2"
+heapless = "0.9"
+
+[package.metadata.esp-idf-sys]
+esp_idf_version = "v5.5.2"
+esp_idf_sdkconfig_defaults = ["sdkconfig.defaults"]
+
+[profile.dev]
+opt-level = 1
+debug = 1
+
+[profile.release]
+opt-level = "s"
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+debug = 1
