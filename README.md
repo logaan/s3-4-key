@@ -14,18 +14,40 @@ host-side unit tests (`cargo test`).
 
 ## Wiring
 
-Plug the switches directly into the StickS3 header. Each switch uses two adjacent
-pin rows; the firmware holds the return pins LOW (open-drain), so every switch
-reads LOW while pressed.
+Plug the switches directly into the StickS3 top Hat2-Bus header (2x8, 2.54 mm).
+One header row is mostly power (`GND`, `EXT_5V`, `Boot`, `G1`, `G8`, `BAT`,
+`3V3_L2`, `5V_IN`); the other row is a contiguous run of GPIOs, in order
+`G5 G4 G6 G7 G43 G44 G2 G3`. All four switches sit in that GPIO row, each
+switch's two leads side by side:
 
-| Switch | Signal pin | Other lead | Note |
-| --- | --- | --- | --- |
-| A | `G1` | `GND` | The only true ground |
-| S | `G4` | `G2` | G2 held LOW by firmware |
-| D | `G6` | `G5` | G5 held LOW by firmware |
-| F | `G8` | `G7` | G7 held LOW by firmware |
+| Switch | Signal pin | Return pin (held LOW) |
+| --- | --- | --- |
+| A | `G5` | `G4` |
+| S | `G6` | `G7` |
+| D | `G43` | `G44` |
+| F | `G2` | `G3` |
 
-Do not wire anything to `5V`, `BAT`, `3V3`, `EXT_5V` or `5V_IN`. The S3 is a 3.3 V device.
+Seen from above, the header reads (direction may be mirrored on your unit):
+
+```
+GPIO row:   G5   G4   G6   G7   G43  G44  G2   G3
+switches:   [ A----A ][ S----S ][ D-----D ][ F-----F ]
+other row:  GND EXT_5V Boot G1  G8   BAT  3V3  5V_IN
+```
+
+The firmware holds the return pins LOW (open-drain), so every switch reads LOW
+while pressed; no switch is wired to ground directly.
+
+- `G43`/`G44` are the ESP32-S3 UART0 pins; they are free here because the
+  console runs on the built-in USB Serial/JTAG port.
+- `G3` is a strapping pin (JTAG source). Holding it LOW matches the chip
+  default, so holding F across a reset is harmless.
+- The pairs run in header order above; if the silk on your unit reads the other
+  way, the keys come out mirrored - either swap the switch labels or edit the
+  pin map in `firmware/src/board.rs`.
+
+Do not wire anything to `5V`, `BAT`, `3V3`, `EXT_5V` or `5V_IN` - they sit in
+the opposite header row, right next to the switch pins. The S3 is a 3.3 V device.
 
 Power it from USB while flashing; afterwards it runs from the built-in 250 mAh battery.
 

@@ -24,29 +24,35 @@ pub struct Inputs {
     keys: [PinDriver<'static, Input>; 5],
     blue: PinDriver<'static, Input>,
     // Retaining these drivers keeps each independent switch return LOW.
-    _returns: [PinDriver<'static, Output>; 3],
+    _returns: [PinDriver<'static, Output>; 4],
 }
 
 impl Hardware {
     pub fn new() -> anyhow::Result<Self> {
         let p = Peripherals::take()?;
         let pins = p.pins;
+        // Hat2-Bus top header (2x8, 2.54 mm). One row is GND/EXT_5V/Boot/G1/G8/
+        // BAT/3V3_L2/5V_IN; the other row is a contiguous GPIO run, in order:
+        // G5 G4 G6 G7 G43 G44 G2 G3. Every switch plugs into that GPIO row with
+        // its two leads side by side, and the firmware holds each neighbour LOW.
+        //
         // Open-drain LOW is sufficient for the tiny internal pull-up current.
         // Even an accidental HIGH latch would float, never source current into a switch.
         let mut returns = [
-            PinDriver::output_od(pins.gpio2)?,
-            PinDriver::output_od(pins.gpio5)?,
-            PinDriver::output_od(pins.gpio7)?,
+            PinDriver::output_od(pins.gpio4)?,  // A return
+            PinDriver::output_od(pins.gpio7)?,  // S return
+            PinDriver::output_od(pins.gpio44)?, // D return (UART0 RXD; console is on USB)
+            PinDriver::output_od(pins.gpio3)?,  // F return (LOW matches the default JTAG strap)
         ];
         for pin in &mut returns {
             pin.set_low()?;
         }
         let inputs = Inputs {
             keys: [
-                PinDriver::input(pins.gpio1, Pull::Up)?,  // A: G1 <-> GND
-                PinDriver::input(pins.gpio4, Pull::Up)?,  // S: G4 <-> G2 (LOW)
-                PinDriver::input(pins.gpio6, Pull::Up)?,  // D: G6 <-> G5 (LOW)
-                PinDriver::input(pins.gpio8, Pull::Up)?,  // F: G8 <-> G7 (LOW)
+                PinDriver::input(pins.gpio5, Pull::Up)?,  // A: G5 <-> G4 (LOW)
+                PinDriver::input(pins.gpio6, Pull::Up)?,  // S: G6 <-> G7 (LOW)
+                PinDriver::input(pins.gpio43, Pull::Up)?, // D: G43 <-> G44 (LOW); UART0 TXD, unused
+                PinDriver::input(pins.gpio2, Pull::Up)?,  // F: G2 <-> G3 (LOW)
                 PinDriver::input(pins.gpio12, Pull::Up)?, // Right button: Backspace
             ],
             blue: PinDriver::input(pins.gpio11, Pull::Up)?,
